@@ -1,10 +1,7 @@
 package com.example.quizz.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 
@@ -13,6 +10,7 @@ import java.time.Instant;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class QuizzUserAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

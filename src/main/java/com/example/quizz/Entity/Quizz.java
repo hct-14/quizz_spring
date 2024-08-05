@@ -2,10 +2,7 @@ package com.example.quizz.Entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Blob;
 import java.time.Instant;
@@ -16,6 +13,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "quizz")
 public class Quizz {
     @Id
@@ -39,8 +37,6 @@ public class Quizz {
     @OneToMany(mappedBy = "quizz")
     private List<History> history;
 
-    @OneToMany(mappedBy = "quizz")
-    private List<UserQuizz> userQuizz;
 
     @OneToMany(mappedBy = "quizz")
     private List<QuizzUserAnswer> quizzUserAnswer;
