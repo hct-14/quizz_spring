@@ -1,5 +1,6 @@
 package com.example.quizz.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -28,8 +29,9 @@ public class Role {
     private String createdBy;
     private String updatedBy;
 
-    @ManyToMany(mappedBy = "roles")
-    private List<User> users;  // Thay đổi từ User thành List<User>
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    @JsonIgnore
+    List<User> users;
 
 //    @PrePersist
 //    public void handleBeforeCreatedateAt() {

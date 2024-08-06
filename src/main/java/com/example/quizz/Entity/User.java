@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Blob;
 import java.time.Instant;
 import java.util.List;
 
@@ -36,9 +37,10 @@ public class User {
     @NotBlank(message = "không được để trống password")
     private String password;
 
-    @Lob // Thêm annotation này
+    //    @Lob // Thêm annotation này
     @Column(length = 5000)  // Thay đổi length theo nhu cầu
-    private byte[] image; // Thay đổi kiểu dữ liệu thành byte[]
+    private Blob image; // Thay đổi kiểu dữ liệu thành byte[]
+    @Column(length = 5000)  // Thay đổi length theo nhu cầu
 
     private String refreshToken;
     private Instant refreshExpireTime;
@@ -50,13 +52,10 @@ public class User {
     private List<History> history;
 
 
-
     @OneToMany(mappedBy = "user")
     private List<QuizzUserAnswer> quizzUserAnswer;
 
-    @ManyToMany
-    @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private List<Role> roles;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
 }

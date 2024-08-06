@@ -26,6 +26,8 @@ public class Quizz {
     @NotBlank(message = "không được để trống desc")
     private String description;
 
+//    @Lob // Thêm annotation này
+    @Column(length = 5000)
     private Blob image;
     private String difficulty;
 
