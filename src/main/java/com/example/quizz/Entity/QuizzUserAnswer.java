@@ -1,9 +1,11 @@
 package com.example.quizz.Entity;
 
+import com.example.quizz.Util.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Entity
 @Setter
@@ -32,4 +34,18 @@ public class QuizzUserAnswer {
     @ManyToOne
     @JoinColumn(name = "question_id")
     private QuizzQuetion quizzQuetion;
+
+    @PrePersist
+    public void handleBeforeCreatedateAt() {
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()==true ?
+                SecurityUtil.getCurrentUserLogin().get() : null;
+        this.createdAt = Instant.now();
+
+    }
+    @PreUpdate
+    public void handleBeforeUpdateAt() {
+        Optional<String> currentUserLogin = SecurityUtil.getCurrentUserLogin();
+        this.updatedBy = currentUserLogin.orElse(null);
+        this.updatedAt = Instant.now();
+    }
 }

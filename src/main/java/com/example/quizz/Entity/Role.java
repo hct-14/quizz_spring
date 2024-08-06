@@ -1,5 +1,6 @@
 package com.example.quizz.Entity;
 
+import com.example.quizz.Util.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -7,6 +8,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -33,19 +35,19 @@ public class Role {
     @JsonIgnore
     List<User> users;
 
-//    @PrePersist
-//    public void handleBeforeCreatedateAt() {
-//        this.createdBy = SercuryUtil.getCurrentUserLogin().isPresent()==true ?
-//                SercuryUtil.getCurrentUserLogin().get() : null;
-//        this.createdAt = Instant.now();
-//
-//    }
-//    @PreUpdate
-//    public void handleBeforeUpdateAt() {
-//        Optional<String> currentUserLogin = SercuryUtil.getCurrentUserLogin();
-//        this.updatedBy = currentUserLogin.orElse(null);
-//        this.updatedAt = Instant.now();
-//    }
+    @PrePersist
+    public void handleBeforeCreatedateAt() {
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()==true ?
+                SecurityUtil.getCurrentUserLogin().get() : null;
+        this.createdAt = Instant.now();
+
+    }
+    @PreUpdate
+    public void handleBeforeUpdateAt() {
+        Optional<String> currentUserLogin = SecurityUtil.getCurrentUserLogin();
+        this.updatedBy = currentUserLogin.orElse(null);
+        this.updatedAt = Instant.now();
+    }
 
 
 }

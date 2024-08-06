@@ -1,6 +1,7 @@
 package com.example.quizz.Entity;
 
 import com.example.quizz.Enum.GenderEnum;
+import com.example.quizz.Util.SecurityUtil;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ import lombok.Setter;
 import java.sql.Blob;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Setter
@@ -46,6 +48,9 @@ public class User {
     private Instant refreshExpireTime;
     private Instant createdAt;
     private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
+
     private Instant deletedAt;
 
     @OneToMany(mappedBy = "user")
@@ -58,4 +63,20 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
+
+
+    @PrePersist
+    public void handleBeforeCreatedateAt() {
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()==true ?
+                SecurityUtil.getCurrentUserLogin().get() : null;
+        this.createdAt = Instant.now();
+
+    }
+    @PreUpdate
+    public void handleBeforeUpdateAt() {
+        Optional<String> currentUserLogin = SecurityUtil.getCurrentUserLogin();
+        this.updatedBy = currentUserLogin.orElse(null);
+        this.updatedAt = Instant.now();
+    }
+
 }
