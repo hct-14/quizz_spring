@@ -1,6 +1,7 @@
 package com.example.quizz.Entity;
 
 import com.example.quizz.Util.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -41,6 +42,12 @@ public class Quizz {
     @OneToMany(mappedBy = "quizz")
     private List<History> history;
 
+    @OneToMany(mappedBy = "quizz", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<QuizzQuetion> quizzQuetion;
+
+    @OneToMany(mappedBy = "quizz")
+    private List<QuizzUser> quizzUser;
 
     @OneToMany(mappedBy = "quizz")
     private List<QuizzUserAnswer> quizzUserAnswer;

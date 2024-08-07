@@ -56,7 +56,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<History> history;
 
-
     @OneToMany(mappedBy = "user")
     private List<QuizzUserAnswer> quizzUserAnswer;
 
@@ -64,6 +63,8 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<QuizzUser> quizzUser;
 
     @PrePersist
     public void handleBeforeCreatedateAt() {
@@ -78,5 +79,7 @@ public class User {
         this.updatedBy = currentUserLogin.orElse(null);
         this.updatedAt = Instant.now();
     }
+
+
 
 }

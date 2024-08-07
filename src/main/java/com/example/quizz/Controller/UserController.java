@@ -32,7 +32,7 @@ public class UserController {
     public String huhu(){
         return "hoang cong thanh dep trai";
     }
-    @PostMapping("/test")
+    @PostMapping("/user")
     public User test(@Valid @RequestBody User user) throws IdvalidException {
         String hashPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
@@ -87,5 +87,10 @@ public class UserController {
         this.userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body("xoa oke");
 
+   }
+   @PostMapping("/user-change")
+    public ResponseEntity<String> changeUser(@RequestBody String current_password, String new_password, User user) throws IdvalidException {
+        this.userService.notifyPassword(current_password, new_password);
+        return ResponseEntity.status(HttpStatus.OK).body("doi mat khau oke");
    }
 }

@@ -29,7 +29,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 public class OauthController {
         @Autowired
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -51,8 +51,8 @@ public class OauthController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/auth/login")
-    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody ReqLoginDTO loginDto) {
+    @PostMapping("/login")
+    public ResponseEntity<ResLoginDTO> login(@RequestBody ReqLoginDTO loginDto) {
         // Nạp input gồm username/password vào Security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDto.getUsername(), loginDto.getPassword());
@@ -113,7 +113,7 @@ public class OauthController {
 //        User createUser = this.userService.handleRegister(postManUser);
 //        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.converToResCreateUserDTO(createUser));
 //    }
-    @GetMapping("/auth/account")
+    @GetMapping("/account")
     @Apimessage("fetch account")
     public ResponseEntity<ResLoginDTO.UserGetAccount> getAccount() {
         String email = securyUtil.getCurrentUserLogin().isPresent()
@@ -136,7 +136,7 @@ public class OauthController {
         return ResponseEntity.ok().body(userGetAccount);
     }
 
-    @GetMapping("/auth/refresh")
+    @GetMapping("/refresh")
     @Apimessage("Get User by refresh token")
     public ResponseEntity<ResLoginDTO> getRefreshToken(
             @CookieValue(name = "refresh_token", defaultValue = "abc") String refresh_token) throws IdvalidException {
@@ -189,7 +189,7 @@ public class OauthController {
                 .body(res);
     }
 
-    @PostMapping("/auth/logout")
+    @PostMapping("/logout")
     @Apimessage("Logout User")
     public ResponseEntity<Void> logout() throws IdvalidException {
         String email = securyUtil.getCurrentUserLogin().isPresent() ? securyUtil.getCurrentUserLogin().get() : "";

@@ -12,13 +12,14 @@ import com.example.quizz.Repository.QuizzUserAnswerRepository;
 import com.example.quizz.Repository.RoleRepository;
 import com.example.quizz.Repository.UserRepository;
 //import com.example.quizz.SercurityUtil;
+import com.example.quizz.Util.SecurityUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,29 +31,51 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final HistoryRepository historyRepository;
     private final QuizzUserAnswerRepository quizzUserAnswerRepository;
+    private final SecurityUtil securityUtil;
+    private final PasswordEncoder passwordEncoder;
+//    private final RoleRepository roleRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, HistoryRepository historyRepository, QuizzUserAnswerRepository quizzUserAnswerRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository,
+                       HistoryRepository historyRepository,
+                       QuizzUserAnswerRepository quizzUserAnswerRepository,
+                       SecurityUtil securityUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.historyRepository = historyRepository;
         this.quizzUserAnswerRepository = quizzUserAnswerRepository;
+        this.securityUtil = securityUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
 
-    public boolean existsByEmail(String email) {
+    public boolean exitsByEmail(String email) {
         return this.userRepository.existsByEmail(email);
     }
+    public User createUser(User user) {
 
-    public User createUser(User user) throws IdvalidException {
-        boolean userExists = existsByEmail(user.getEmail());
-        if (!userExists) {
-
-            return this.userRepository.save(user);
-        } else {
-          throw new IdvalidException("email này đã tồn tại vui lòng nhập email khác");
+//        if (user.getCompany() !=null){
+//            Optional<Company> companyOptional = this.companyService.findById(user.getCompany().getId());
+//            user.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+//
+//        }
+        if (user.getRole() != null){
+            Optional<Role> role = this.roleRepository.findById(user.getRole().getId());
+            user.setRole(role.isPresent() ? role.get() : null);
         }
+
+        return this.userRepository.save(user);
+
     }
+//    public User createUser(User user) throws IdvalidException {
+//        Optional<User> userExists = findByEmail(user.getEmail());
+//        if (!userExists.isPresent()) {
+//
+//            return this.userRepository.save(user);
+//        } else {
+//          throw new IdvalidException("email này đã tồn tại vui lòng nhập email khác");
+//        }
+//    }
     public User handleGetUserByUsername(String username) {
         return this.userRepository.findByEmail(username);
     }
@@ -207,16 +230,43 @@ public class UserService {
                 this.historyRepository.delete(history);
             }
         }
+//        if (user.get)
         if (user.getQuizzUserAnswer() != null){
             for (QuizzUserAnswer quizzUserAnswer : user.getQuizzUserAnswer()){
                 this.quizzUserAnswerRepository.delete(quizzUserAnswer);
             }
         }
+
         this.userRepository.deleteById(id);
 
     }
 
+    public User notifyPassword(String current_password, String new_password) throws IdvalidException {
+        Optional<String> currentUserOpt = securityUtil.getCurrentUserLogin();
 
+        if (!currentUserOpt.isPresent()) {
+            throw new IdvalidException("Không có người dùng hiện tại");
+        }
+
+        String email = currentUserOpt.get();
+
+        // Tìm người dùng bằng email
+        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
+
+        if (!userOptional.isPresent()) {
+            throw new IdvalidException("Người dùng không tồn tại");
+        }
+
+        User user = userOptional.get();
+
+        // So sánh mật khẩu hiện tại với mật khẩu trong cơ sở dữ liệu
+        if (!passwordEncoder.matches(current_password, user.getPassword())) {
+            throw new IdvalidException("Mật khẩu hiện tại không đúng");
+        }
+
+        user.setPassword(passwordEncoder.encode(new_password));
+        return this.userRepository.save(user);
+    }
 
 
 }

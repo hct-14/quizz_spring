@@ -17,8 +17,9 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "quizzquetion")
-public class QuizzQuetion {
+@Table(name = "quizzquestion")
+public// Corrected table name
+class QuizzQuetion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -29,21 +30,22 @@ public class QuizzQuetion {
     private String createdBy;
     private String updatedBy;
 
-    @OneToMany(mappedBy = "quizzQuetion")
-    private List<QuizzUserAnswer> quizzUserAnswers;
+    @OneToMany(mappedBy = "quizzQuestion")
+    private List<QuizzAnswer> quizzAnswers; // Changed to List and corrected property name
 
+    @ManyToOne
+    @JoinColumn(name = "quiz_id")
+    private Quizz quizz;
 
     @PrePersist
     public void handleBeforeCreatedateAt() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()==true ?
-                SecurityUtil.getCurrentUserLogin().get() : null;
+        this.createdBy = SecurityUtil.getCurrentUserLogin().orElse(null);
         this.createdAt = Instant.now();
-
     }
+
     @PreUpdate
     public void handleBeforeUpdateAt() {
-        Optional<String> currentUserLogin = SecurityUtil.getCurrentUserLogin();
-        this.updatedBy = currentUserLogin.orElse(null);
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse(null);
         this.updatedAt = Instant.now();
     }
 }
