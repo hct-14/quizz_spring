@@ -2,11 +2,15 @@ package com.example.quizz.Controller;
 
 
 import com.example.quizz.Dto.ResUserDTO;
+import com.example.quizz.Dto.ResultPaginationDTO;
 import com.example.quizz.Entity.User;
 import com.example.quizz.Exception.IdvalidException;
 import com.example.quizz.Service.UserService;
+import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,7 +60,7 @@ public class UserController {
 ////        Specification<User> spec = buildSpecificationFromParams(params);
 //        return ResponseEntity.status(HttpStatus.OK).body(this.userService.findbyAllUser(spec, pageable));
 //    }
-
+//
 //    private Specification<User> buildSpecificationFromParams(Map<String, String> params) {
 //        return (root, query, criteriaBuilder) -> {
 //            Predicate predicate = criteriaBuilder.conjunction();
@@ -88,7 +92,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body("xoa oke");
 
    }
-   @PostMapping("/user-change")
+   @PostMapping("/change-password")
     public ResponseEntity<String> changeUser(@RequestBody String current_password, String new_password, User user) throws IdvalidException {
         this.userService.notifyPassword(current_password, new_password);
         return ResponseEntity.status(HttpStatus.OK).body("doi mat khau oke");

@@ -31,7 +31,7 @@ class QuizzQuetion {
     private String updatedBy;
 
     @OneToMany(mappedBy = "quizzQuestion")
-    private List<QuizzAnswer> quizzAnswers; // Changed to List and corrected property name
+    private List<QuizzAnswer> quizzAnswers;
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
@@ -47,5 +47,9 @@ class QuizzQuetion {
     public void handleBeforeUpdateAt() {
         this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse(null);
         this.updatedAt = Instant.now();
+    }
+
+    public void setQuizzAnswers(List<QuizzAnswer> dbQuizzAnswers) {
+
     }
 }

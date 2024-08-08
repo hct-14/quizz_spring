@@ -23,13 +23,15 @@ public class QuizzService {
     private final QuizzUserAnswerRepository quizzUserAnswerRepository;
     private final QuizzQuestionRepository quizzQuestionRepository;
     private final UserRepository userRepository;
+    private final QuizzAnswerRepository quizzAnswerRepository;
 
-    public QuizzService(QuizzRepository quizzRepository,UserRepository userRepository, HistoryRepository historyRepository, QuizzUserAnswerRepository quizzUserAnswerRepository, QuizzQuestionRepository quizzQuestionRepository) {
+    public QuizzService(QuizzRepository quizzRepository,QuizzAnswerRepository quizzAnswerRepository,UserRepository userRepository, HistoryRepository historyRepository, QuizzUserAnswerRepository quizzUserAnswerRepository, QuizzQuestionRepository quizzQuestionRepository) {
         this.quizzRepository = quizzRepository;
         this.historyRepository = historyRepository;
         this.quizzUserAnswerRepository = quizzUserAnswerRepository;
         this.quizzQuestionRepository = quizzQuestionRepository;
         this.userRepository = userRepository;
+        this.quizzAnswerRepository = quizzAnswerRepository;
     }
 
     public Quizz createQuizz(Quizz quizz){
@@ -122,48 +124,74 @@ public class QuizzService {
         this.quizzRepository.deleteById(id);
 
     }
-//    public ResultPaginationDTO getQuizzUser(Specification<Quizz> spec, Pageable pageable) {
-//        Page<Quizz> quizzPage = this.quizzRepository.findAll(spec, pageable);
-//        ResultPaginationDTO rs = new ResultPaginationDTO();
-//        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
-//
-//        mt.setPage(pageable.getPageNumber() + 1);
-//        mt.setPageSize(pageable.getPageSize());
-//        mt.setPages(quizzPage.getTotalPages());
-//        mt.setTotal(quizzPage.getTotalElements());
-//        rs.setMeta(mt);
-//
-//        List<ResQuizzUserDTO> listUser = quizzPage.getContent()
-//                .stream()
-//                .map(item -> new ResQuizzUserDTO(
-//                        item.getId(),
-//                        item.getName(),
-//
-//                        item.getQuizzQuetion() != null ? item.getQuizzQuetion().stream().map(quizzQuestion -> new ResQuizzUserDTO.QuizzQuestion(
-//                                quizzQuestion.getId(),
-//                                quizzQuestion.getDescription(),
-//                                quizzQuestion.getImage(),
-//
-//                                quizzQuestion.getAnswer() != null ? quizzQuestion.getA.stream().map(answer -> new ResQuizzUserDTO.QuizzQuestion.Answer(
-//                                        answer.getId(),
-//                                        answer.getDescription(),
-//                                        answer.getIsCorrect()
-//                                )).collect(Collectors.toList()) : new ArrayList<>()
-//                        )).collect(Collectors.toList()) : new ArrayList<>(),
-//
-////                        item.getQuizzAnswers() != null ? item.getQuizzAnswers().stream().map(answer -> new ResQuizzUserDTO.QuizzQuestion.Answer(
-////                                answer.getId(),
-////                                answer.getDescription(),
-////                                answer.getIsCorrect()
-////                        )).collect(Collectors.toList()) : new ArrayList<>()
-//                ))
-//                .collect(Collectors.toList());
-//
-//        rs.setContent(listUser);
-//
-//        return rs;
-//    }
+    public ResultPaginationDTO getQuizzUser(Specification<Quizz> spec, Pageable pageable) {
+        Page<Quizz> quizzPage = this.quizzRepository.findAll(spec, pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(quizzPage.getTotalPages());
+        mt.setTotal(quizzPage.getTotalElements());
+        rs.setMeta(mt);
+
+        List<ResQuizzUserDTO> listUser = quizzPage.getContent()
+                .stream()
+                .map(item -> new ResQuizzUserDTO(
+                        item.getId(),
+                        item.getName(),
+                        item.getQuizzQuetion() != null ? item.getQuizzQuetion().stream().map(quizzQuestion -> new ResQuizzUserDTO.QuizzQuestion(
+                                quizzQuestion.getId(),
+                                quizzQuestion.getDescription(),
+                                quizzQuestion.getImage(),
+                                quizzQuestion.getQuizzAnswers() != null ? quizzQuestion.getQuizzAnswers().stream().map(answer -> new ResQuizzUserDTO.QuizzQuestion.Answer(
+                                        answer.getId(),
+                                        answer.getDescription(),
+                                        answer.getCorrectAnswer()
+                                )).collect(Collectors.toList()) : new ArrayList<>()
+                        )).collect(Collectors.toList()) : new ArrayList<>()
+                ))
+                .collect(Collectors.toList());
+
+        rs.setResult(listUser);
+
+        return rs;
+    }
+
+    public Quizz createQuizzQuest(Quizz quizz) throws IdvalidException {
+        Optional<Quizz> quizzOptional = this.quizzRepository.findById(quizz.getId());
+        if (!quizzOptional.isPresent()){
+            throw new IdvalidException("Quizz không tồn tại");
+        }
+
+        Quizz existingQuizz = quizzOptional.get();
+        if (existingQuizz.getQuizzQuetion() != null) {
+            List<Integer> reqQuest = existingQuizz.getQuizzQuetion().stream().map(QuizzQuetion::getId).collect(Collectors.toList());
+            List<QuizzQuetion> dbQuizzQuest = this.quizzRepository.findByIdIn(reqQuest);
+            existingQuizz.setQuizzQuetion(dbQuizzQuest);
+
+            for (QuizzQuetion quizzQuestion : dbQuizzQuest) {
+                if (quizzQuestion.getQuizzAnswers() != null) {
+                    List<Integer> reqAnswerIds = quizzQuestion.getQuizzAnswers().stream().map(QuizzAnswer::getId).collect(Collectors.toList());
+                    List<QuizzAnswer> dbQuizzAnswers = this.quizzAnswerRepository.findByIdIn(reqAnswerIds);
+
+                    // Cập nhật danh sách câu trả lời từ cơ sở dữ liệu
+                    quizzQuestion.setQuizzAnswers(dbQuizzAnswers);
+
+                    // Kiểm tra và thêm câu trả lời mới nếu chưa tồn tại
+                    for (QuizzAnswer answer : quizzQuestion.getQuizzAnswers()) {
+                        if (!dbQuizzAnswers.contains(answer)) {
+                            dbQuizzAnswers.add(answer);
+                        }
+                    }
+                } else {
+                    quizzQuestion.setQuizzAnswers(new ArrayList<>());
+                }
+            }
+        }
+
+        return this.quizzRepository.save(existingQuizz);
+    }
 
 
 

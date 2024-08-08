@@ -120,6 +120,7 @@ public class UserService {
                                 history.getTotalCorrect(),
                                 history.getTotalQuestions()
                         )).collect(Collectors.toList()) : new ArrayList<>(),
+
                         item.getQuizzUserAnswer() != null ? item.getQuizzUserAnswer().stream().map(userAnswer -> new ResUserDTO.QuizzUserAnswer(
                                 userAnswer.getId()
                         )).collect(Collectors.toList()) : new ArrayList<>(),

@@ -20,7 +20,7 @@ public class QuizzAnswer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String description;
-    private String correctAnswer;
+    private int correctAnswer;
 
     private Instant createdAt;
     private Instant updatedAt;
@@ -42,4 +42,5 @@ public class QuizzAnswer {
         this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse(null);
         this.updatedAt = Instant.now();
     }
+
 }

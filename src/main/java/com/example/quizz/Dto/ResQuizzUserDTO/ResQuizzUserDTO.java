@@ -17,7 +17,6 @@ public class ResQuizzUserDTO {
     private int id;
     private String name;
     private List<QuizzQuestion> quizzQuestions;
-    private List<QuizzQuestion.Answer> quizzAnswers;
 
     @Setter
     @Getter
@@ -27,7 +26,7 @@ public class ResQuizzUserDTO {
         private int id;
         private String description;
         private Blob images;
-        private List<Answer> answers; // Ensure this matches your entity relationship
+        private List<Answer> answers; // Thay đổi thành List<Answer>
 
         @Setter
         @Getter
